@@ -92,15 +92,18 @@ pub fn plot_history(history: &Vec<SimulationState>, y_col: &str, filepath: &str)
     let y_min = y_min - y_padding;
     let y_max = y_max + y_padding;
 
+    // Get descriptive title and axis labels
+    let (title, y_label) = get_descriptive_labels(y_col);
+
     let root_area = BitMapBackend::new(filepath, PLOT_SIZE)
         .into_drawing_area();
     root_area.fill(&WHITE).unwrap();
 
     let mut chart = ChartBuilder::on(&root_area)
-        .caption(format!("Simulation History ({})", y_col), ("sans-serif", 50).into_font())
+        .caption(title, ("sans-serif", 50).into_font())
         .margin(10)
-        .x_label_area_size(30)
-        .y_label_area_size(30)
+        .x_label_area_size(40)
+        .y_label_area_size(60)
         .build_cartesian_2d(
             0.0..history.last().unwrap().time,
             y_min..y_max,
@@ -108,6 +111,8 @@ pub fn plot_history(history: &Vec<SimulationState>, y_col: &str, filepath: &str)
         .unwrap();
 
     chart.configure_mesh()
+        .y_desc(y_label)
+        .x_desc("Time (atomic units)")
         .y_label_formatter(&|v| format!("{:.5}", v))
         .x_label_formatter(&|v| format!("{:.1}", v))
         .draw()
@@ -150,10 +155,10 @@ fn plot_energy_history(history: &Vec<SimulationState>, filepath: &str) {
     let e_max = e_max + e_padding;
 
     let mut chart = ChartBuilder::on(&root_area)
-        .caption("Energy History", ("sans-serif", 50).into_font())
+        .caption("Energy Components Over Time", ("sans-serif", 50).into_font())
         .margin(10)
-        .x_label_area_size(30)
-        .y_label_area_size(30)
+        .x_label_area_size(40)
+        .y_label_area_size(60)
         .build_cartesian_2d(
             0.0..history.last().unwrap().time,
             e_min..e_max,
@@ -161,6 +166,8 @@ fn plot_energy_history(history: &Vec<SimulationState>, filepath: &str) {
         .unwrap();
 
     chart.configure_mesh()
+        .y_desc("Energy (atomic units)")
+        .x_desc("Time (atomic units)")
         .y_label_formatter(&|v| format!("{:.5}", v))
         .x_label_formatter(&|v| format!("{:.1}", v))
         .draw()
@@ -316,15 +323,19 @@ pub fn plot_history_overlayed(history_1: &Vec<SimulationState>, history_2: &Vec<
     let y_min = y_min - y_padding;
     let y_max = y_max + y_padding;
 
+    // Get descriptive title and axis labels
+    let (title, y_label) = get_descriptive_labels(y_col);
+    let title = format!("Comparison: {}", title);
+
     let root_area = BitMapBackend::new(filepath, PLOT_SIZE)
         .into_drawing_area();
     root_area.fill(&WHITE).unwrap();
 
     let mut chart = ChartBuilder::on(&root_area)
-        .caption(format!("Simulation History ({})", y_col), ("sans-serif", 50).into_font())
+        .caption(title, ("sans-serif", 50).into_font())
         .margin(10)
-        .x_label_area_size(30)
-        .y_label_area_size(30)
+        .x_label_area_size(40)
+        .y_label_area_size(60)
         .build_cartesian_2d(
             0.0..history_1.last().unwrap().time,
             y_min..y_max,
@@ -332,6 +343,8 @@ pub fn plot_history_overlayed(history_1: &Vec<SimulationState>, history_2: &Vec<
         .unwrap();
 
     chart.configure_mesh()
+        .y_desc(y_label)
+        .x_desc("Time (atomic units)")
         .y_label_formatter(&|v| format!("{:.5}", v))
         .x_label_formatter(&|v| format!("{:.1}", v))
         .draw()
@@ -387,10 +400,10 @@ fn plot_energy_histories_overlayed(history_1: &Vec<SimulationState>, history_2: 
     let e_max = e_max + e_padding;
 
     let mut chart = ChartBuilder::on(&root_area)
-        .caption("Energy History", ("sans-serif", 50).into_font())
+        .caption("Comparison: Energy Components Over Time", ("sans-serif", 50).into_font())
         .margin(10)
-        .x_label_area_size(30)
-        .y_label_area_size(30)
+        .x_label_area_size(40)
+        .y_label_area_size(60)
         .build_cartesian_2d(
             0.0..history_1.last().unwrap().time,
             e_min..e_max,
@@ -398,6 +411,8 @@ fn plot_energy_histories_overlayed(history_1: &Vec<SimulationState>, history_2: 
         .unwrap();
 
     chart.configure_mesh()
+        .y_desc("Energy (atomic units)")
+        .x_desc("Time (atomic units)")
         .y_label_formatter(&|v| format!("{:.5}", v))
         .x_label_formatter(&|v| format!("{:.1}", v))
         .draw()
@@ -431,7 +446,7 @@ fn plot_energy_histories_overlayed(history_1: &Vec<SimulationState>, history_2: 
         .label("Total Energy (Morse)")
         .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], &GREEN));
 
-    // Draw second history energies (Harmonic) with dashed lines
+    // Draw second history energies (Harmonic) with lighter colors
     chart
         .draw_series(LineSeries::new(
             history_2.iter().map(|s| (s.time, s.kinetic_e)),
@@ -465,4 +480,42 @@ fn plot_energy_histories_overlayed(history_1: &Vec<SimulationState>, history_2: 
         .border_style(&BLACK)
         .draw()
         .unwrap();
+}
+
+// Helper function to get descriptive titles and axis labels
+fn get_descriptive_labels(y_col: &str) -> (String, String) {
+    match y_col {
+        "displacement" => (
+            "Bond Displacement Over Time".to_string(),
+            "Displacement (atomic units)".to_string()
+        ),
+        "force" => (
+            "Force Evolution Over Time".to_string(),
+            "Force (atomic units)".to_string()
+        ),
+        "acceleration" => (
+            "Acceleration Evolution Over Time".to_string(),
+            "Acceleration (atomic units)".to_string()
+        ),
+        "velocity" => (
+            "Velocity Evolution Over Time".to_string(),
+            "Velocity (atomic units)".to_string()
+        ),
+        "kinetic_e" => (
+            "Kinetic Energy Over Time".to_string(),
+            "Kinetic Energy (atomic units)".to_string()
+        ),
+        "potential_e" => (
+            "Potential Energy Over Time".to_string(),
+            "Potential Energy (atomic units)".to_string()
+        ),
+        "total_e" => (
+            "Total Energy Over Time".to_string(),
+            "Total Energy (atomic units)".to_string()
+        ),
+        _ => (
+            format!("{} Over Time", y_col),
+            format!("{} (atomic units)", y_col)
+        ),
+    }
 }
