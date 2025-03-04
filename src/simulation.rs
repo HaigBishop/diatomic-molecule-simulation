@@ -2,6 +2,11 @@ use std::fs::OpenOptions;
 use std::io::Write;
 use plotters::prelude::*;
 
+/// Helper function for formatting x-axis tick labels as integers.
+fn integer_tick_formatter(v: &f32) -> String {
+    format!("{:.0}", v)
+}
+
 #[derive(Clone)]
 pub struct SimulationState {
     pub time: f32,
@@ -92,15 +97,39 @@ pub fn plot_history(history: &Vec<SimulationState>, y_col: &str, filepath: &str)
     let y_min = y_min - y_padding;
     let y_max = y_max + y_padding;
 
+    // Compute common scaling factor so that tick labels have at most one digit before the decimal place
+    let y_abs_max = y_min.abs().max(y_max.abs());
+    let y_scale = if y_abs_max == 0.0 { 1.0 } else { 10f32.powf(y_abs_max.log10().floor()) };
+
+    // Modify y-axis label to include the magnitude multiplier if it's not 1 (i.e. e0)
+    let base_label = match y_col {
+        "displacement" => ("Displacement", "a₀"),
+        "force" => ("Force", "a.u."),
+        "acceleration" => ("Acceleration", "a.u."),
+        "velocity" => ("Velocity", "a.u."),
+        "kinetic_e" => ("Kinetic Energy", "a.u."),
+        "potential_e" => ("Potential Energy", "a.u."),
+        "total_e" => ("Total Energy", "a.u."),
+        _ => (y_col, ""),
+    };
+
+    let y_label = if (y_scale - 1.0).abs() < std::f32::EPSILON {
+        format!("{} ({})", base_label.0, base_label.1)
+    } else {
+        let exponent = y_scale.log10() as i32;
+        format!("{} (10^{} {})", base_label.0, exponent, base_label.1)
+    };
+
     let root_area = BitMapBackend::new(filepath, PLOT_SIZE)
         .into_drawing_area();
     root_area.fill(&WHITE).unwrap();
 
     let mut chart = ChartBuilder::on(&root_area)
-        .caption(format!("Simulation History ({})", y_col), ("sans-serif", 50).into_font())
-        .margin(10)
-        .x_label_area_size(30)
-        .y_label_area_size(30)
+        .caption(format!("Simulation History ({})", y_col), ("sans-serif", 30).into_font())
+        .margin_left(40)
+        .margin_bottom(30)
+        .x_label_area_size(85)
+        .y_label_area_size(120)
         .build_cartesian_2d(
             0.0..history.last().unwrap().time,
             y_min..y_max,
@@ -108,8 +137,14 @@ pub fn plot_history(history: &Vec<SimulationState>, y_col: &str, filepath: &str)
         .unwrap();
 
     chart.configure_mesh()
-        .y_label_formatter(&|v| format!("{:.5}", v))
-        .x_label_formatter(&|v| format!("{:.1}", v))
+        .x_desc("Time (au)")
+        .y_desc(y_label)
+        .x_label_formatter(&integer_tick_formatter)
+        .y_label_formatter(&|v: &f32| format!("{:.3}", *v / y_scale))
+        .x_labels(10)
+        .y_labels(10)
+        .x_label_style(("sans-serif", 30).into_font())
+        .y_label_style(("sans-serif", 30).into_font())
         .draw()
         .unwrap();
 
@@ -126,6 +161,7 @@ pub fn plot_history(history: &Vec<SimulationState>, y_col: &str, filepath: &str)
         .configure_series_labels()
         .background_style(&WHITE.mix(0.8))
         .border_style(&BLACK)
+        .label_font(("sans-serif", 30).into_font())
         .draw()
         .unwrap();
 }
@@ -149,11 +185,23 @@ fn plot_energy_history(history: &Vec<SimulationState>, filepath: &str) {
     let e_min = e_min - e_padding;
     let e_max = e_max + e_padding;
 
+    // Compute scaling factor for energy y-axis
+    let y_abs_max = e_min.abs().max(e_max.abs());
+    let y_scale = if y_abs_max == 0.0 { 1.0 } else { 10f32.powf(y_abs_max.log10().floor()) };
+
+    let y_label = if (y_scale - 1.0).abs() < std::f32::EPSILON {
+        "Energy (a.u.)".to_string()
+    } else {
+        let exponent = y_scale.log10() as i32;
+        format!("Energy (10^{} a.u.)", exponent)
+    };
+
     let mut chart = ChartBuilder::on(&root_area)
-        .caption("Energy History", ("sans-serif", 50).into_font())
-        .margin(10)
-        .x_label_area_size(30)
-        .y_label_area_size(30)
+        .caption("Energy History", ("sans-serif", 30).into_font())
+        .margin_left(40)
+        .margin_bottom(30)
+        .x_label_area_size(85)
+        .y_label_area_size(120)
         .build_cartesian_2d(
             0.0..history.last().unwrap().time,
             e_min..e_max,
@@ -161,8 +209,14 @@ fn plot_energy_history(history: &Vec<SimulationState>, filepath: &str) {
         .unwrap();
 
     chart.configure_mesh()
-        .y_label_formatter(&|v| format!("{:.5}", v))
-        .x_label_formatter(&|v| format!("{:.1}", v))
+        .x_desc("Time (au)")
+        .y_desc(y_label)
+        .x_label_formatter(&integer_tick_formatter)
+        .y_label_formatter(&|v: &f32| format!("{:.3}", *v / y_scale))
+        .x_labels(10)
+        .y_labels(10)
+        .x_label_style(("sans-serif", 30).into_font())
+        .y_label_style(("sans-serif", 30).into_font())
         .draw()
         .unwrap();
 
@@ -200,6 +254,7 @@ fn plot_energy_history(history: &Vec<SimulationState>, filepath: &str) {
         .configure_series_labels()
         .background_style(&WHITE.mix(0.8))
         .border_style(&BLACK)
+        .label_font(("sans-serif", 30).into_font())
         .draw()
         .unwrap();
 }
@@ -235,7 +290,6 @@ pub fn plot_histories(history: &Vec<SimulationState>, exp_name: &str, image_type
         &format!("{}/energies.{}", exp_dir, image_type));
 }
 
-
 pub fn plot_histories_overlayed(history_1: &Vec<SimulationState>, history_2: &Vec<SimulationState>, exp_name: &str, image_type: &str) {
     // Create the experiment directory inside output
     let exp_dir = format!("output/{}", exp_name);
@@ -255,8 +309,6 @@ pub fn plot_histories_overlayed(history_1: &Vec<SimulationState>, history_2: &Ve
     plot_energy_histories_overlayed(history_1, history_2, 
         &format!("{}/energies.{}", exp_dir, image_type));
 }
-
-
 
 pub fn get_difference_of_histories(history_1: &Vec<SimulationState>, history_2: &Vec<SimulationState>) -> Vec<SimulationState> {
     let mut difference_of_histories: Vec<SimulationState> = Vec::new();
@@ -316,15 +368,38 @@ pub fn plot_history_overlayed(history_1: &Vec<SimulationState>, history_2: &Vec<
     let y_min = y_min - y_padding;
     let y_max = y_max + y_padding;
 
+    // Compute common scaling factor for the y-axis
+    let combined_y_abs_max = y_min.abs().max(y_max.abs());
+    let y_scale = if combined_y_abs_max == 0.0 { 1.0 } else { 10f32.powf(combined_y_abs_max.log10().floor()) };
+
+    let base_label = match y_col {
+        "displacement" => ("Displacement", "a₀"),
+        "force" => ("Force", "a.u."),
+        "acceleration" => ("Acceleration", "a.u."),
+        "velocity" => ("Velocity", "a.u."),
+        "kinetic_e" => ("Kinetic Energy", "a.u."),
+        "potential_e" => ("Potential Energy", "a.u."),
+        "total_e" => ("Total Energy", "a.u."),
+        _ => (y_col, ""),
+    };
+
+    let y_label = if (y_scale - 1.0).abs() < std::f32::EPSILON {
+        format!("{} ({})", base_label.0, base_label.1)
+    } else {
+        let exponent = y_scale.log10() as i32;
+        format!("{} (10^{} {})", base_label.0, exponent, base_label.1)
+    };
+
     let root_area = BitMapBackend::new(filepath, PLOT_SIZE)
         .into_drawing_area();
     root_area.fill(&WHITE).unwrap();
 
     let mut chart = ChartBuilder::on(&root_area)
-        .caption(format!("Simulation History ({})", y_col), ("sans-serif", 50).into_font())
-        .margin(10)
-        .x_label_area_size(30)
-        .y_label_area_size(30)
+        .caption(format!("Simulation History ({})", y_col), ("sans-serif", 30).into_font())
+        .margin_left(40)
+        .margin_bottom(30)
+        .x_label_area_size(85)
+        .y_label_area_size(120)
         .build_cartesian_2d(
             0.0..history_1.last().unwrap().time,
             y_min..y_max,
@@ -332,8 +407,14 @@ pub fn plot_history_overlayed(history_1: &Vec<SimulationState>, history_2: &Vec<
         .unwrap();
 
     chart.configure_mesh()
-        .y_label_formatter(&|v| format!("{:.5}", v))
-        .x_label_formatter(&|v| format!("{:.1}", v))
+        .x_desc("Time (au)")
+        .y_desc(y_label)
+        .x_label_formatter(&integer_tick_formatter)
+        .y_label_formatter(&|v: &f32| format!("{:.3}", *v / y_scale))
+        .x_labels(10)
+        .y_labels(10)
+        .x_label_style(("sans-serif", 30).into_font())
+        .y_label_style(("sans-serif", 30).into_font())
         .draw()
         .unwrap();
 
@@ -361,6 +442,7 @@ pub fn plot_history_overlayed(history_1: &Vec<SimulationState>, history_2: &Vec<
         .configure_series_labels()
         .background_style(&WHITE.mix(0.8))
         .border_style(&BLACK)
+        .label_font(("sans-serif", 30).into_font())
         .draw()
         .unwrap();
 }
@@ -386,11 +468,23 @@ fn plot_energy_histories_overlayed(history_1: &Vec<SimulationState>, history_2: 
     let e_min = e_min - e_padding;
     let e_max = e_max + e_padding;
 
+    // Compute scaling factor for energy y-axis
+    let y_abs_max = e_min.abs().max(e_max.abs());
+    let y_scale = if y_abs_max == 0.0 { 1.0 } else { 10f32.powf(y_abs_max.log10().floor()) };
+
+    let y_label = if (y_scale - 1.0).abs() < std::f32::EPSILON {
+        "Energy (a.u.)".to_string()
+    } else {
+        let exponent = y_scale.log10() as i32;
+        format!("Energy (10^{} a.u.)", exponent)
+    };
+
     let mut chart = ChartBuilder::on(&root_area)
-        .caption("Energy History", ("sans-serif", 50).into_font())
-        .margin(10)
-        .x_label_area_size(30)
-        .y_label_area_size(30)
+        .caption("Energy History", ("sans-serif", 30).into_font())
+        .margin_left(40)
+        .margin_bottom(30)
+        .x_label_area_size(85)
+        .y_label_area_size(120)
         .build_cartesian_2d(
             0.0..history_1.last().unwrap().time,
             e_min..e_max,
@@ -398,8 +492,14 @@ fn plot_energy_histories_overlayed(history_1: &Vec<SimulationState>, history_2: 
         .unwrap();
 
     chart.configure_mesh()
-        .y_label_formatter(&|v| format!("{:.5}", v))
-        .x_label_formatter(&|v| format!("{:.1}", v))
+        .x_desc("Time (au)")
+        .y_desc(y_label)
+        .x_label_formatter(&integer_tick_formatter)
+        .y_label_formatter(&|v: &f32| format!("{:.3}", *v / y_scale))
+        .x_labels(10)
+        .y_labels(10)
+        .x_label_style(("sans-serif", 30).into_font())
+        .y_label_style(("sans-serif", 30).into_font())
         .draw()
         .unwrap();
 
@@ -463,6 +563,10 @@ fn plot_energy_histories_overlayed(history_1: &Vec<SimulationState>, history_2: 
         .configure_series_labels()
         .background_style(&WHITE.mix(0.8))
         .border_style(&BLACK)
+        .label_font(("sans-serif", 30).into_font())
         .draw()
         .unwrap();
 }
+
+
+
