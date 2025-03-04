@@ -531,7 +531,7 @@ fn plot_energy_histories_overlayed(history_1: &Vec<SimulationState>, history_2: 
         .label("Total Energy (Morse)")
         .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], &GREEN));
 
-    // Draw second history energies (Harmonic) with dashed lines
+    // Draw second history energies (Harmonic) with lighter colors
     chart
         .draw_series(LineSeries::new(
             history_2.iter().map(|s| (s.time, s.kinetic_e)),

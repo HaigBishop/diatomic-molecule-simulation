@@ -37,17 +37,18 @@ const AR2_K_AU: f32 = 3.232914E-04;
 const AR2_RSTR_AU: f32 = 7.107260E+00;
 const AR2_EPS_AU: f32 = 4.536240E-04;
 // Ar2 physical constants (SI)
-const AR2_K_SI: f32 = 3.316838E-26;
+const AR2_K_SI: f32 = 5.033442E-01;
+
 
 
 // Time steps
-const DT_AU: f32 = 2.0;
-const EXP_LEN_AU: f32 = 3200.0;
+const DT_AU: f32 = 10.0;
+const EXP_LEN_AU: f32 = 300000.0;
 const N_STEPS: i32 = (EXP_LEN_AU / DT_AU) as i32;
 const PRINT_FREQ: i32 = 200;
 
 // Temperature in Kelvin
-const TEMP_K: f32 = 300.0; // 100.0 200.0 298.15 500.0 1000.0
+const TEMP_K: f32 = 50.0; // 100.0 200.0 298.15 500.0 1000.0
 
 
 fn init_harmonic_osc(r0_a0: f32, k_au: f32, m_au: f32) -> SimulationState {
@@ -148,6 +149,7 @@ fn simulate_lennard_jones_state(state: &mut SimulationState, m_au: f32, rstar: f
     state.total_e = state.kinetic_e + state.potential_e;
 }
 
+
 fn main() {
 
     // Set Up //////////////////////////////////
@@ -172,10 +174,15 @@ fn main() {
     let r0_a0_morse_h2: f32 = r0_si_morse / A0_TO_M;
     let r0_a0_harm_hg2: f32 = r0_si_harm_hg2 / A0_TO_M;
     let r0_a0_harm_ar2: f32 = r0_si_harm_ar2 / A0_TO_M;
-    let r0_a0_lj_hg2: f32 = HG2_RSTR_AU * ((2.0 * HG2_EPS_AU).powf(1.0 / 12.0) * ((HG2_K_AU).sqrt() * r0_a0_harm_hg2 + (2.0 * HG2_EPS_AU).sqrt()).powf(-1.0 / 6.0) - 1.0);
-    let r0_a0_lj_ar2: f32 = AR2_RSTR_AU * ((2.0 * AR2_EPS_AU).powf(1.0 / 12.0) * ((AR2_K_AU).sqrt() * r0_a0_harm_ar2 + (2.0 * AR2_EPS_AU).sqrt()).powf(-1.0 / 6.0) - 1.0);
-    println!("r0_a0_harm_h2: {}", r0_a0_harm_h2);
-    println!("r0_a0_morse_h2: {}", r0_a0_morse_h2);
+    // let r0_a0_lj_hg2: f32 = HG2_RSTR_AU * (((2.0 * HG2_EPS_AU).powf(1.0 / 12.0) * ((HG2_K_AU).sqrt() * r0_a0_harm_hg2 + (2.0 * HG2_EPS_AU).sqrt()).powf(-1.0 / 6.0)) - 1.0);
+    // let r0_a0_lj_ar2: f32 = AR2_RSTR_AU * (((2.0 * AR2_EPS_AU).powf(1.0 / 12.0) * ((AR2_K_AU).sqrt() * r0_a0_harm_ar2 + (2.0 * AR2_EPS_AU).sqrt()).powf(-1.0 / 6.0)) - 1.0);
+    let r0_a0_lj_hg2 = HG2_RSTR_AU * (((1.0 + (HG2_K_AU * r0_a0_harm_hg2.powi(2) / HG2_EPS_AU).sqrt()).powf(-1.0 / 6.0)) - 1.0);
+    let r0_a0_lj_ar2 = AR2_RSTR_AU * (((1.0 + (AR2_K_AU * r0_a0_harm_ar2.powi(2) / AR2_EPS_AU).sqrt()).powf(-1.0 / 6.0)) - 1.0);
+
+    println!("r0_si_harm_hg2: {}", r0_si_harm_hg2);
+    println!("r0_si_harm_ar2: {}", r0_si_harm_ar2);
+    println!("r0_a0_harm_hg2: {}", r0_a0_harm_hg2);
+    println!("r0_a0_harm_ar2: {}", r0_a0_harm_ar2);
     println!("r0_a0_lj_hg2: {}", r0_a0_lj_hg2);
     println!("r0_a0_lj_ar2: {}", r0_a0_lj_ar2);
 
