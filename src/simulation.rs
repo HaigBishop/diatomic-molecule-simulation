@@ -70,7 +70,7 @@ pub fn print_state(state: &SimulationState) {
     );
 }
 
-pub fn plot_history(history: &Vec<SimulationState>, y_col: &str, filepath: &str) {
+pub fn plot_history(history: &Vec<SimulationState>, y_col: &str, filepath: &str, source_name: &str) {
     // Create the output directory if it doesn't exist
     let output_dir = "output";
     if !std::path::Path::new(output_dir).exists() {
@@ -125,8 +125,9 @@ pub fn plot_history(history: &Vec<SimulationState>, y_col: &str, filepath: &str)
     root_area.fill(&WHITE).unwrap();
 
     let mut chart = ChartBuilder::on(&root_area)
-        .caption(format!("Simulation History ({})", y_col.to_string().chars().next().unwrap().to_uppercase().collect::<String>() + &y_col[1..]), ("sans-serif", 30).into_font())
+        .caption(format!("{} History ({})", source_name, y_col.to_string().chars().next().unwrap().to_uppercase().collect::<String>() + &y_col[1..]), ("sans-serif", 25).into_font())
         .margin_left(40)
+        .margin_right(30)
         .margin_bottom(30)
         .x_label_area_size(85)
         .y_label_area_size(120)
@@ -167,7 +168,7 @@ pub fn plot_history(history: &Vec<SimulationState>, y_col: &str, filepath: &str)
         .unwrap();
 }
 
-fn plot_energy_history(history: &Vec<SimulationState>, filepath: &str) {
+fn plot_energy_history(history: &Vec<SimulationState>, filepath: &str, source_name: &str) {
     let root_area = BitMapBackend::new(filepath, PLOT_SIZE)
         .into_drawing_area();
     root_area.fill(&WHITE).unwrap();
@@ -198,8 +199,9 @@ fn plot_energy_history(history: &Vec<SimulationState>, filepath: &str) {
     };
 
     let mut chart = ChartBuilder::on(&root_area)
-        .caption("Energy History", ("sans-serif", 30).into_font())
+        .caption(format!("{} Energy History", source_name), ("sans-serif", 25).into_font())
         .margin_left(40)
+        .margin_right(30)
         .margin_bottom(30)
         .x_label_area_size(85)
         .y_label_area_size(120)
@@ -261,55 +263,47 @@ fn plot_energy_history(history: &Vec<SimulationState>, filepath: &str) {
         .unwrap();
 }
 
-pub fn plot_histories(history: &Vec<SimulationState>, exp_name: &str, image_type: &str) {
+pub fn plot_histories(history: &Vec<SimulationState>, exp_name: &str, image_type: &str, source_name: &str) {
     // Create the experiment directory inside output
     let exp_dir = format!("output/{}", exp_name);
     std::fs::create_dir_all(&exp_dir).unwrap();
 
     // Plot these columns
     plot_history(history, "displacement", 
-        &format!("{}/displacement.{}", exp_dir, image_type));
+        &format!("{}/displacement.{}", exp_dir, image_type), source_name);
     plot_history(history, "force", 
-        &format!("{}/force.{}", exp_dir, image_type));
+        &format!("{}/force.{}", exp_dir, image_type), source_name);
     plot_history(history, "acceleration", 
-        &format!("{}/acceleration.{}", exp_dir, image_type));
+        &format!("{}/acceleration.{}", exp_dir, image_type), source_name);
     plot_history(history, "velocity", 
-        &format!("{}/velocity.{}", exp_dir, image_type));
+        &format!("{}/velocity.{}", exp_dir, image_type), source_name);
+    plot_history(history, "total_e", 
+        &format!("{}/total_e.{}", exp_dir, image_type), source_name);
 
-    // Plot energies
-    // plot_history(history, "kinetic_e", 
-    //     &format!("{}/kinetic_e.{}", exp_dir, image_type), image_type
-    // );
-    // plot_history(history, "potential_e", 
-    //     &format!("{}/potential_e.{}", exp_dir, image_type), image_type
-    // );
-    // plot_history(history, "total_e", 
-    //     &format!("{}/total_e.{}", exp_dir, image_type), image_type
-    // );
-    
     // Plot energy history
     plot_energy_history(history, 
-        &format!("{}/energies.{}", exp_dir, image_type));
+        &format!("{}/energies.{}", exp_dir, image_type), source_name);
 }
 
-pub fn plot_histories_overlayed(history_1: &Vec<SimulationState>, history_2: &Vec<SimulationState>, exp_name: &str, image_type: &str) {
+pub fn plot_histories_overlayed(history_1: &Vec<SimulationState>, history_2: &Vec<SimulationState>, 
+                               exp_name: &str, image_type: &str, source_name: &str) {
     // Create the experiment directory inside output
     let exp_dir = format!("output/{}", exp_name);
     std::fs::create_dir_all(&exp_dir).unwrap();
 
     // Plot these columns overlayed
     plot_history_overlayed(history_1, history_2, "displacement", 
-        &format!("{}/displacement.{}", exp_dir, image_type));
+        &format!("{}/displacement.{}", exp_dir, image_type), source_name);
     plot_history_overlayed(history_1, history_2, "force", 
-        &format!("{}/force.{}", exp_dir, image_type));
+        &format!("{}/force.{}", exp_dir, image_type), source_name);
     plot_history_overlayed(history_1, history_2, "acceleration", 
-        &format!("{}/acceleration.{}", exp_dir, image_type));
+        &format!("{}/acceleration.{}", exp_dir, image_type), source_name);
     plot_history_overlayed(history_1, history_2, "velocity", 
-        &format!("{}/velocity.{}", exp_dir, image_type));
+        &format!("{}/velocity.{}", exp_dir, image_type), source_name);
     
     // Plot energy histories overlayed
     plot_energy_histories_overlayed(history_1, history_2, 
-        &format!("{}/energies.{}", exp_dir, image_type));
+        &format!("{}/energies.{}", exp_dir, image_type), source_name);
 }
 
 pub fn get_difference_of_histories(history_1: &Vec<SimulationState>, history_2: &Vec<SimulationState>) -> Vec<SimulationState> {
@@ -330,7 +324,7 @@ pub fn get_difference_of_histories(history_1: &Vec<SimulationState>, history_2: 
     difference_of_histories
 }
 
-pub fn plot_history_overlayed(history_1: &Vec<SimulationState>, history_2: &Vec<SimulationState>, y_col: &str, filepath: &str) {
+pub fn plot_history_overlayed(history_1: &Vec<SimulationState>, history_2: &Vec<SimulationState>, y_col: &str, filepath: &str, source_name: &str) {
     // Create the output directory if it doesn't exist
     let output_dir = "output";
     if !std::path::Path::new(output_dir).exists() {
@@ -397,8 +391,9 @@ pub fn plot_history_overlayed(history_1: &Vec<SimulationState>, history_2: &Vec<
     root_area.fill(&WHITE).unwrap();
 
     let mut chart = ChartBuilder::on(&root_area)
-        .caption(format!("Simulation History ({})", y_col.to_string().chars().next().unwrap().to_uppercase().collect::<String>() + &y_col[1..]), ("sans-serif", 30).into_font())
+        .caption(format!("{} History ({})", source_name, y_col.to_string().chars().next().unwrap().to_uppercase().collect::<String>() + &y_col[1..]), ("sans-serif", 25).into_font())
         .margin_left(40)
+        .margin_right(30)
         .margin_bottom(30)
         .x_label_area_size(85)
         .y_label_area_size(120)
@@ -450,7 +445,7 @@ pub fn plot_history_overlayed(history_1: &Vec<SimulationState>, history_2: &Vec<
         .unwrap();
 }
 
-fn plot_energy_histories_overlayed(history_1: &Vec<SimulationState>, history_2: &Vec<SimulationState>, filepath: &str) {
+fn plot_energy_histories_overlayed(history_1: &Vec<SimulationState>, history_2: &Vec<SimulationState>, filepath: &str, source_name: &str) {
     let root_area = BitMapBackend::new(filepath, PLOT_SIZE)
         .into_drawing_area();
     root_area.fill(&WHITE).unwrap();
@@ -483,8 +478,9 @@ fn plot_energy_histories_overlayed(history_1: &Vec<SimulationState>, history_2: 
     };
 
     let mut chart = ChartBuilder::on(&root_area)
-        .caption("Energy History", ("sans-serif", 30).into_font())
+        .caption(format!("{} Energy History", source_name), ("sans-serif", 25).into_font())
         .margin_left(40)
+        .margin_right(30)
         .margin_bottom(30)
         .x_label_area_size(85)
         .y_label_area_size(120)

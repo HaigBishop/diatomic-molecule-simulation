@@ -42,14 +42,17 @@ const AR2_K_SI: f32 = 5.033442E-01;
 
 
 // Time steps
-const DT_AU: f32 = 2.0;
-const EXP_LEN_AU: f32 = 3200.0;
+const DT_AU: f32 = 1.0;
+const EXP_LEN_AU: f32 = 350000.0;
 const N_STEPS: i32 = (EXP_LEN_AU / DT_AU) as i32;
 const PRINT_FREQ: i32 = 200;
 
 // Temperature in Kelvin
-const TEMP_K: f32 = 300.0; // 100.0 200.0 298.15 500.0 1000.0
+const TEMP_K: f32 = 298.15; // 100.0 200.0 298.15 500.0 1000.0
 
+// Title customization options
+const TEMP_IN_TITLE: bool = true;
+const TIME_IN_TITLE: bool = true;
 
 fn init_harmonic_osc(r0_a0: f32, k_au: f32, m_au: f32) -> SimulationState {
     SimulationState {
@@ -163,6 +166,15 @@ fn main() {
     let exp_name_hg2_lj = format!("hg2_lj_{}_sim", exp_name_base);
     let exp_name_ar2_lj = format!("ar2_lj_{}_sim", exp_name_base);
 
+    // Create title suffixes based on constants
+    let mut title_suffix = String::new();
+    if TIME_IN_TITLE {
+        title_suffix.push_str(&format!(" (dt={})", DT_AU as i32));
+    }
+    if TEMP_IN_TITLE {
+        title_suffix.push_str(&format!(" (temp={})", TEMP_K as i32));
+    }
+
     println!("Calculation Initial Displacements...");
     // Calculate the initial displacement in SI
     let r0_si_harm_h2: f32 = ((2.0 * KB * TEMP_K) / H2_K_SI).sqrt();
@@ -174,10 +186,10 @@ fn main() {
     let r0_a0_morse_h2: f32 = r0_si_morse / A0_TO_M;
     let r0_a0_harm_hg2: f32 = r0_si_harm_hg2 / A0_TO_M;
     let r0_a0_harm_ar2: f32 = r0_si_harm_ar2 / A0_TO_M;
-    // let r0_a0_lj_hg2: f32 = HG2_RSTR_AU * (((2.0 * HG2_EPS_AU).powf(1.0 / 12.0) * ((HG2_K_AU).sqrt() * r0_a0_harm_hg2 + (2.0 * HG2_EPS_AU).sqrt()).powf(-1.0 / 6.0)) - 1.0);
-    // let r0_a0_lj_ar2: f32 = AR2_RSTR_AU * (((2.0 * AR2_EPS_AU).powf(1.0 / 12.0) * ((AR2_K_AU).sqrt() * r0_a0_harm_ar2 + (2.0 * AR2_EPS_AU).sqrt()).powf(-1.0 / 6.0)) - 1.0);
-    let r0_a0_lj_hg2 = HG2_RSTR_AU * (((1.0 + (HG2_K_AU * r0_a0_harm_hg2.powi(2) / HG2_EPS_AU).sqrt()).powf(-1.0 / 6.0)) - 1.0);
-    let r0_a0_lj_ar2 = AR2_RSTR_AU * (((1.0 + (AR2_K_AU * r0_a0_harm_ar2.powi(2) / AR2_EPS_AU).sqrt()).powf(-1.0 / 6.0)) - 1.0);
+    let r0_a0_lj_hg2: f32 = HG2_RSTR_AU * (((2.0 * HG2_EPS_AU).powf(1.0 / 12.0) * ((HG2_K_AU).sqrt() * r0_a0_harm_hg2 + (2.0 * HG2_EPS_AU).sqrt()).powf(-1.0 / 6.0)) - 1.0);
+    let r0_a0_lj_ar2: f32 = AR2_RSTR_AU * (((2.0 * AR2_EPS_AU).powf(1.0 / 12.0) * ((AR2_K_AU).sqrt() * r0_a0_harm_ar2 + (2.0 * AR2_EPS_AU).sqrt()).powf(-1.0 / 6.0)) - 1.0);
+    // let r0_a0_lj_hg2 = HG2_RSTR_AU * (((1.0 + (HG2_K_AU * r0_a0_harm_hg2.powi(2) / HG2_EPS_AU).sqrt()).powf(-1.0 / 6.0)) - 1.0);
+    // let r0_a0_lj_ar2 = AR2_RSTR_AU * (((1.0 + (AR2_K_AU * r0_a0_harm_ar2.powi(2) / AR2_EPS_AU).sqrt()).powf(-1.0 / 6.0)) - 1.0);
 
     println!("r0_si_harm_hg2: {}", r0_si_harm_hg2);
     println!("r0_si_harm_ar2: {}", r0_si_harm_ar2);
@@ -206,7 +218,7 @@ fn main() {
         }
     }
     // Plot all histories in the harmonic_osc directory
-    plot_histories(&harm_sim_history, &exp_name_harm_sim, "png");
+    plot_histories(&harm_sim_history, &exp_name_harm_sim, "png", &format!("H2 Harmonic Oscillator Simulation{}", title_suffix));
     // Write harm_sim_history to file
     write_history(&harm_sim_history, &exp_name_harm_sim);
 
@@ -228,15 +240,15 @@ fn main() {
         }
     }
     // Plot all histories in the harmonic_osc directory
-    plot_histories(&harm_calc_history, &exp_name_harm_calc, "png");
+    plot_histories(&harm_calc_history, &exp_name_harm_calc, "png", &format!("H2 Harmonic Oscillator Calculation{}", title_suffix));
     // Write harm_calc_history to file
     write_history(&harm_calc_history, &exp_name_harm_calc);
 
 
 
-    // H2 Harmonic Oscillator Difference //////////////////////////////////
+    // H2 Harmonic Oscillator Calc/Sim Differences //////////////////////////////////
     let difference_of_harm_histories = get_difference_of_histories(&harm_sim_history, &harm_calc_history);
-    plot_histories(&difference_of_harm_histories, &exp_name_harm_diff, "png");
+    plot_histories(&difference_of_harm_histories, &exp_name_harm_diff, "png", &format!("H2 Harmonic Oscillator Difference{}", title_suffix));
     write_history(&difference_of_harm_histories, &exp_name_harm_diff);
 
 
@@ -258,9 +270,9 @@ fn main() {
         }
     }
     // Plot all histories in the morse_potential directory
-    plot_histories(&morse_sim_history, &exp_name_morse_sim, "png");
+    plot_histories(&morse_sim_history, &exp_name_morse_sim, "png", &format!("H2 Morse Potential Simulation{}", title_suffix));
     // Plot the morse history overlayed on the harmonic history
-    plot_histories_overlayed(&morse_sim_history, &harm_sim_history, &exp_name_morse_overlay, "png");
+    plot_histories_overlayed(&morse_sim_history, &harm_sim_history, &exp_name_morse_overlay, "png", &format!("H2 Morse vs Harmonic Comparison{}", title_suffix));
     // Write morse_sim_history to file
     write_history(&morse_sim_history, &exp_name_morse_sim);
 
@@ -277,7 +289,7 @@ fn main() {
             print_state(&state);
         }
     }
-    plot_histories(&hg2_lj_history, &exp_name_hg2_lj, "png");
+    plot_histories(&hg2_lj_history, &exp_name_hg2_lj, "png", &format!("Hg2 Lennard-Jones Simulation{}", title_suffix));
     write_history(&hg2_lj_history, &exp_name_hg2_lj);
 
 
@@ -293,7 +305,7 @@ fn main() {
             print_state(&state);
         }
     }
-    plot_histories(&ar2_lj_history, &exp_name_ar2_lj, "png");
+    plot_histories(&ar2_lj_history, &exp_name_ar2_lj, "png", &format!("Ar2 Lennard-Jones Simulation{}", title_suffix));
     write_history(&ar2_lj_history, &exp_name_ar2_lj);
 
     println!("Done!");
