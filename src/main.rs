@@ -42,13 +42,13 @@ const AR2_K_SI: f32 = 5.033442E-01;
 
 
 // Time steps
-const DT_AU: f32 = 10.0;
-const EXP_LEN_AU: f32 = 300000.0;
+const DT_AU: f32 = 2.0;
+const EXP_LEN_AU: f32 = 3200.0;
 const N_STEPS: i32 = (EXP_LEN_AU / DT_AU) as i32;
 const PRINT_FREQ: i32 = 200;
 
 // Temperature in Kelvin
-const TEMP_K: f32 = 50.0; // 100.0 200.0 298.15 500.0 1000.0
+const TEMP_K: f32 = 300.0; // 100.0 200.0 298.15 500.0 1000.0
 
 
 fn init_harmonic_osc(r0_a0: f32, k_au: f32, m_au: f32) -> SimulationState {
