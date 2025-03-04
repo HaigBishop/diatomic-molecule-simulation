@@ -103,13 +103,13 @@ pub fn plot_history(history: &Vec<SimulationState>, y_col: &str, filepath: &str)
 
     // Modify y-axis label to include the magnitude multiplier if it's not 1 (i.e. e0)
     let base_label = match y_col {
-        "displacement" => ("Displacement", "a₀"),
-        "force" => ("Force", "a.u."),
-        "acceleration" => ("Acceleration", "a.u."),
-        "velocity" => ("Velocity", "a.u."),
-        "kinetic_e" => ("Kinetic Energy", "a.u."),
-        "potential_e" => ("Potential Energy", "a.u."),
-        "total_e" => ("Total Energy", "a.u."),
+        "displacement" => ("Displacement", "a0"),
+        "force" => ("Force", "au"),
+        "acceleration" => ("Acceleration", "au"),
+        "velocity" => ("Velocity", "au"),
+        "kinetic_e" => ("Kinetic Energy", "au"),
+        "potential_e" => ("Potential Energy", "au"),
+        "total_e" => ("Total Energy", "au"),
         _ => (y_col, ""),
     };
 
@@ -125,7 +125,7 @@ pub fn plot_history(history: &Vec<SimulationState>, y_col: &str, filepath: &str)
     root_area.fill(&WHITE).unwrap();
 
     let mut chart = ChartBuilder::on(&root_area)
-        .caption(format!("Simulation History ({})", y_col), ("sans-serif", 30).into_font())
+        .caption(format!("Simulation History ({})", y_col.to_string().chars().next().unwrap().to_uppercase().collect::<String>() + &y_col[1..]), ("sans-serif", 30).into_font())
         .margin_left(40)
         .margin_bottom(30)
         .x_label_area_size(85)
@@ -140,7 +140,7 @@ pub fn plot_history(history: &Vec<SimulationState>, y_col: &str, filepath: &str)
         .x_desc("Time (au)")
         .y_desc(y_label)
         .x_label_formatter(&integer_tick_formatter)
-        .y_label_formatter(&|v: &f32| format!("{:.3}", *v / y_scale))
+        .y_label_formatter(&|v: &f32| format!("{:.1}", *v / y_scale))
         .x_labels(10)
         .y_labels(10)
         .x_label_style(("sans-serif", 30).into_font())
@@ -154,7 +154,7 @@ pub fn plot_history(history: &Vec<SimulationState>, y_col: &str, filepath: &str)
             &RED,
         ))
         .unwrap()
-        .label(y_col)
+        .label(y_col.to_string().chars().next().unwrap().to_uppercase().collect::<String>() + &y_col[1..])
         .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], &RED));
 
     chart
@@ -162,6 +162,7 @@ pub fn plot_history(history: &Vec<SimulationState>, y_col: &str, filepath: &str)
         .background_style(&WHITE.mix(0.8))
         .border_style(&BLACK)
         .label_font(("sans-serif", 30).into_font())
+        .position(SeriesLabelPosition::UpperRight)
         .draw()
         .unwrap();
 }
@@ -190,10 +191,10 @@ fn plot_energy_history(history: &Vec<SimulationState>, filepath: &str) {
     let y_scale = if y_abs_max == 0.0 { 1.0 } else { 10f32.powf(y_abs_max.log10().floor()) };
 
     let y_label = if (y_scale - 1.0).abs() < std::f32::EPSILON {
-        "Energy (a.u.)".to_string()
+        "Energy (au)".to_string()
     } else {
         let exponent = y_scale.log10() as i32;
-        format!("Energy (10^{} a.u.)", exponent)
+        format!("Energy (10^{} au)", exponent)
     };
 
     let mut chart = ChartBuilder::on(&root_area)
@@ -212,7 +213,7 @@ fn plot_energy_history(history: &Vec<SimulationState>, filepath: &str) {
         .x_desc("Time (au)")
         .y_desc(y_label)
         .x_label_formatter(&integer_tick_formatter)
-        .y_label_formatter(&|v: &f32| format!("{:.3}", *v / y_scale))
+        .y_label_formatter(&|v: &f32| format!("{:.1}", *v / y_scale))
         .x_labels(10)
         .y_labels(10)
         .x_label_style(("sans-serif", 30).into_font())
@@ -255,6 +256,7 @@ fn plot_energy_history(history: &Vec<SimulationState>, filepath: &str) {
         .background_style(&WHITE.mix(0.8))
         .border_style(&BLACK)
         .label_font(("sans-serif", 30).into_font())
+        .position(SeriesLabelPosition::UpperRight)
         .draw()
         .unwrap();
 }
@@ -373,13 +375,13 @@ pub fn plot_history_overlayed(history_1: &Vec<SimulationState>, history_2: &Vec<
     let y_scale = if combined_y_abs_max == 0.0 { 1.0 } else { 10f32.powf(combined_y_abs_max.log10().floor()) };
 
     let base_label = match y_col {
-        "displacement" => ("Displacement", "a₀"),
-        "force" => ("Force", "a.u."),
-        "acceleration" => ("Acceleration", "a.u."),
-        "velocity" => ("Velocity", "a.u."),
-        "kinetic_e" => ("Kinetic Energy", "a.u."),
-        "potential_e" => ("Potential Energy", "a.u."),
-        "total_e" => ("Total Energy", "a.u."),
+        "displacement" => ("Displacement", "a0"),
+        "force" => ("Force", "au"),
+        "acceleration" => ("Acceleration", "au"),
+        "velocity" => ("Velocity", "au"),
+        "kinetic_e" => ("Kinetic Energy", "au"),
+        "potential_e" => ("Potential Energy", "au"),
+        "total_e" => ("Total Energy", "au"),
         _ => (y_col, ""),
     };
 
@@ -395,7 +397,7 @@ pub fn plot_history_overlayed(history_1: &Vec<SimulationState>, history_2: &Vec<
     root_area.fill(&WHITE).unwrap();
 
     let mut chart = ChartBuilder::on(&root_area)
-        .caption(format!("Simulation History ({})", y_col), ("sans-serif", 30).into_font())
+        .caption(format!("Simulation History ({})", y_col.to_string().chars().next().unwrap().to_uppercase().collect::<String>() + &y_col[1..]), ("sans-serif", 30).into_font())
         .margin_left(40)
         .margin_bottom(30)
         .x_label_area_size(85)
@@ -410,7 +412,7 @@ pub fn plot_history_overlayed(history_1: &Vec<SimulationState>, history_2: &Vec<
         .x_desc("Time (au)")
         .y_desc(y_label)
         .x_label_formatter(&integer_tick_formatter)
-        .y_label_formatter(&|v: &f32| format!("{:.3}", *v / y_scale))
+        .y_label_formatter(&|v: &f32| format!("{:.1}", *v / y_scale))
         .x_labels(10)
         .y_labels(10)
         .x_label_style(("sans-serif", 30).into_font())
@@ -425,7 +427,7 @@ pub fn plot_history_overlayed(history_1: &Vec<SimulationState>, history_2: &Vec<
             &RED,
         ))
         .unwrap()
-        .label(format!("{} (Morse)", y_col))
+        .label(format!("{} (Morse)", y_col.to_string().chars().next().unwrap().to_uppercase().collect::<String>() + &y_col[1..]))
         .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], &RED));
 
     // Draw second history in blue
@@ -435,7 +437,7 @@ pub fn plot_history_overlayed(history_1: &Vec<SimulationState>, history_2: &Vec<
             &BLUE,
         ))
         .unwrap()
-        .label(format!("{} (Harmonic)", y_col))
+        .label(format!("{} (Harmonic)", y_col.to_string().chars().next().unwrap().to_uppercase().collect::<String>() + &y_col[1..]))
         .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], &BLUE));
 
     chart
@@ -443,6 +445,7 @@ pub fn plot_history_overlayed(history_1: &Vec<SimulationState>, history_2: &Vec<
         .background_style(&WHITE.mix(0.8))
         .border_style(&BLACK)
         .label_font(("sans-serif", 30).into_font())
+        .position(SeriesLabelPosition::UpperRight)
         .draw()
         .unwrap();
 }
@@ -473,10 +476,10 @@ fn plot_energy_histories_overlayed(history_1: &Vec<SimulationState>, history_2: 
     let y_scale = if y_abs_max == 0.0 { 1.0 } else { 10f32.powf(y_abs_max.log10().floor()) };
 
     let y_label = if (y_scale - 1.0).abs() < std::f32::EPSILON {
-        "Energy (a.u.)".to_string()
+        "Energy (au)".to_string()
     } else {
         let exponent = y_scale.log10() as i32;
-        format!("Energy (10^{} a.u.)", exponent)
+        format!("Energy (10^{} au)", exponent)
     };
 
     let mut chart = ChartBuilder::on(&root_area)
@@ -495,7 +498,7 @@ fn plot_energy_histories_overlayed(history_1: &Vec<SimulationState>, history_2: 
         .x_desc("Time (au)")
         .y_desc(y_label)
         .x_label_formatter(&integer_tick_formatter)
-        .y_label_formatter(&|v: &f32| format!("{:.3}", *v / y_scale))
+        .y_label_formatter(&|v: &f32| format!("{:.1}", *v / y_scale))
         .x_labels(10)
         .y_labels(10)
         .x_label_style(("sans-serif", 30).into_font())
@@ -564,6 +567,7 @@ fn plot_energy_histories_overlayed(history_1: &Vec<SimulationState>, history_2: 
         .background_style(&WHITE.mix(0.8))
         .border_style(&BLACK)
         .label_font(("sans-serif", 30).into_font())
+        .position(SeriesLabelPosition::UpperRight)
         .draw()
         .unwrap();
 }
