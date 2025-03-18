@@ -103,7 +103,7 @@ pub fn plot_history(history: &Vec<SimulationState>, y_col: &str, filepath: &str,
 
     // Modify y-axis label to include the magnitude multiplier if it's not 1 (i.e. e0)
     let base_label = match y_col {
-        "displacement" => ("Displacement", "a0"),
+        "displacement" => ("Displacement", "Å"),
         "force" => ("Force", "au"),
         "acceleration" => ("Acceleration", "au"),
         "velocity" => ("Velocity", "au"),
@@ -125,7 +125,7 @@ pub fn plot_history(history: &Vec<SimulationState>, y_col: &str, filepath: &str,
     root_area.fill(&WHITE).unwrap();
 
     let mut chart = ChartBuilder::on(&root_area)
-        .caption(format!("{} History ({})", source_name, y_col.to_string().chars().next().unwrap().to_uppercase().collect::<String>() + &y_col[1..]), ("sans-serif", 25).into_font())
+        // .caption(format!("{} History ({})", source_name, y_col.to_string().chars().next().unwrap().to_uppercase().collect::<String>() + &y_col[1..]), ("sans-serif", 25).into_font())
         .margin_left(40)
         .margin_right(30)
         .margin_bottom(30)
@@ -199,7 +199,7 @@ fn plot_energy_history(history: &Vec<SimulationState>, filepath: &str, source_na
     };
 
     let mut chart = ChartBuilder::on(&root_area)
-        .caption(format!("{} Energy History", source_name), ("sans-serif", 25).into_font())
+        // .caption(format!("{} Energy History", source_name), ("sans-serif", 25).into_font())
         .margin_left(40)
         .margin_right(30)
         .margin_bottom(30)
@@ -369,7 +369,7 @@ pub fn plot_history_overlayed(history_1: &Vec<SimulationState>, history_2: &Vec<
     let y_scale = if combined_y_abs_max == 0.0 { 1.0 } else { 10f32.powf(combined_y_abs_max.log10().floor()) };
 
     let base_label = match y_col {
-        "displacement" => ("Displacement", "a0"),
+        "displacement" => ("Displacement", "Å"),
         "force" => ("Force", "au"),
         "acceleration" => ("Acceleration", "au"),
         "velocity" => ("Velocity", "au"),
@@ -391,7 +391,7 @@ pub fn plot_history_overlayed(history_1: &Vec<SimulationState>, history_2: &Vec<
     root_area.fill(&WHITE).unwrap();
 
     let mut chart = ChartBuilder::on(&root_area)
-        .caption(format!("{} History ({})", source_name, y_col.to_string().chars().next().unwrap().to_uppercase().collect::<String>() + &y_col[1..]), ("sans-serif", 25).into_font())
+        // .caption(format!("{} History ({})", source_name, y_col.to_string().chars().next().unwrap().to_uppercase().collect::<String>() + &y_col[1..]), ("sans-serif", 25).into_font())
         .margin_left(40)
         .margin_right(30)
         .margin_bottom(30)
@@ -478,7 +478,7 @@ fn plot_energy_histories_overlayed(history_1: &Vec<SimulationState>, history_2: 
     };
 
     let mut chart = ChartBuilder::on(&root_area)
-        .caption(format!("{} Energy History", source_name), ("sans-serif", 25).into_font())
+        // .caption(format!("{} Energy History", source_name), ("sans-serif", 25).into_font())
         .margin_left(40)
         .margin_right(30)
         .margin_bottom(30)

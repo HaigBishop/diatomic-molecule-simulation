@@ -5,3 +5,15 @@ edition = "2021"
 
 [dependencies]
 plotters = "0.3"
+
+[[bin]]
+name = "plt_models"
+path = "src/plt_models.rs"
+
+[[bin]]
+name = "plt_dt_error"
+path = "src/plt_dt_error.rs"
+
+[[bin]]
+name = "plt_temperature"
+path = "src/plt_temperature.rs"
