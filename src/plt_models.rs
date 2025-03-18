@@ -5,6 +5,7 @@ const H2_K_AU: f32 = 3.665358E-01;      // Force constant (harmonic & Morse)
 const H2_D_AU: f32 = 1.818446E-01;      // Dissociation energy (Morse)
 const H2_ALPHA_AU: f32 = 1.003894E+00;  // Bond strength (Morse)
 
+
 // Harmonic potential: V(x) = (1/2) k x²
 fn harmonic_potential(x: f32) -> f32 {
     0.5 * H2_K_AU * x * x

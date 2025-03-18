@@ -42,8 +42,8 @@ const AR2_K_SI: f32 = 5.033442E-01;
 
 
 // Time steps
-const DT_AU: f32 = 1.0;
-const EXP_LEN_AU: f32 = 350000.0;
+const DT_AU: f32 = 4.0;
+const EXP_LEN_AU: f32 = 3500.0;
 const N_STEPS: i32 = (EXP_LEN_AU / DT_AU) as i32;
 const PRINT_FREQ: i32 = 200;
 

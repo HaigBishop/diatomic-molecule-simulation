@@ -8,7 +8,9 @@ const DIRECTORIES: &[(&str, f32)] = &[
     ("harmonic_osc_dt0_temp298_diff", 0.5),
     ("harmonic_osc_dt1_temp298_diff", 1.0),
     ("harmonic_osc_dt2_temp298_diff", 2.0),
+    ("harmonic_osc_dt4_temp298_diff", 4.0),
     ("harmonic_osc_dt5_temp298_diff", 5.0),
+    ("harmonic_osc_dt8_temp298_diff", 8.0),
     ("harmonic_osc_dt10_temp298_diff", 10.0),
 ];
 
@@ -103,7 +105,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         dt_displacement_data.iter().map(|(dt, disp)| (*dt, *disp)),
         RED.stroke_width(3),
     ))?
-    .label("Maximum Displacement")
+    .label("Maximum Displacement Error")
     .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], RED.stroke_width(3)));
     
     // Add data points
