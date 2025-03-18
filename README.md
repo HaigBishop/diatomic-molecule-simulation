@@ -93,11 +93,3 @@ This simulation implements three important potential energy models:
    
    Models van der Waals interactions with a balance of attractive and repulsive forces.
 
-## License
-
-[Your License Here]
-
-## Acknowledgments
-
-- Authors and contributors
-- Academic references for physical constants and models
