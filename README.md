@@ -24,8 +24,6 @@ The simulation uses atomic units (au) throughout its calculations.
   - Comparison plots between different models
 - Automatic data export to CSV files
 
-## Getting Started
-
 ### Prerequisites
 
 - Rust and Cargo (latest stable version recommended)

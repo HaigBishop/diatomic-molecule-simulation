@@ -70,7 +70,7 @@ pub fn print_state(state: &SimulationState) {
     );
 }
 
-pub fn plot_history(history: &Vec<SimulationState>, y_col: &str, filepath: &str, source_name: &str) {
+pub fn plot_history(history: &Vec<SimulationState>, y_col: &str, filepath: &str, _source_name: &str) {
     // Create the output directory if it doesn't exist
     let output_dir = "output";
     if !std::path::Path::new(output_dir).exists() {
@@ -168,7 +168,7 @@ pub fn plot_history(history: &Vec<SimulationState>, y_col: &str, filepath: &str,
         .unwrap();
 }
 
-fn plot_energy_history(history: &Vec<SimulationState>, filepath: &str, source_name: &str) {
+fn plot_energy_history(history: &Vec<SimulationState>, filepath: &str, _source_name: &str) {
     let root_area = BitMapBackend::new(filepath, PLOT_SIZE)
         .into_drawing_area();
     root_area.fill(&WHITE).unwrap();
@@ -324,7 +324,7 @@ pub fn get_difference_of_histories(history_1: &Vec<SimulationState>, history_2: 
     difference_of_histories
 }
 
-pub fn plot_history_overlayed(history_1: &Vec<SimulationState>, history_2: &Vec<SimulationState>, y_col: &str, filepath: &str, source_name: &str) {
+pub fn plot_history_overlayed(history_1: &Vec<SimulationState>, history_2: &Vec<SimulationState>, y_col: &str, filepath: &str, _source_name: &str) {
     // Create the output directory if it doesn't exist
     let output_dir = "output";
     if !std::path::Path::new(output_dir).exists() {
@@ -445,7 +445,7 @@ pub fn plot_history_overlayed(history_1: &Vec<SimulationState>, history_2: &Vec<
         .unwrap();
 }
 
-fn plot_energy_histories_overlayed(history_1: &Vec<SimulationState>, history_2: &Vec<SimulationState>, filepath: &str, source_name: &str) {
+fn plot_energy_histories_overlayed(history_1: &Vec<SimulationState>, history_2: &Vec<SimulationState>, filepath: &str, _source_name: &str) {
     let root_area = BitMapBackend::new(filepath, PLOT_SIZE)
         .into_drawing_area();
     root_area.fill(&WHITE).unwrap();
